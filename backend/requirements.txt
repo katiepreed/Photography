@@ -1,6 +1,8 @@
-transformers
-torch
 flask
-pillow
 flask_cors
-timm
+torch
+transformers
+Pillow
+numpy
+requests
+sentence-transformers

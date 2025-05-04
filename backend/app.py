@@ -6,6 +6,11 @@ from flask_cors import CORS
 import torch
 import io
 
+"""
+# Import the semantic search functionality
+from semantic_search import setup_semantic_search_route, get_embedding
+"""
+
 app = Flask(__name__)
 
 # Configure CORS to allow requests from all origins
@@ -25,7 +30,7 @@ def generate_caption():
     image = Image.open(file.stream).convert("RGB")
     
     # generate caption for image 
-    caption = generate_caption(image)
+    caption = generate_caption_for_image(image)
 
     # Detect if a person is in the image
     has_person = detect_person(image)
@@ -35,7 +40,7 @@ def generate_caption():
         "has_person": has_person
     })
 
-def generate_caption(image):
+def generate_caption_for_image(image):
     # Generate caption
     inputs_caption = processor_caption(image, return_tensors="pt")
     out = model_caption.generate(**inputs_caption)
@@ -58,6 +63,9 @@ def detect_person(image):
             return True
     
     return False
+
+# Add semantic search route to our app
+# setup_semantic_search_route(app)
 
 if __name__ == "__main__":
     # Run Flask on port 5001

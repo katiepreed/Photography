@@ -1,8 +1,8 @@
 /* Gallery.css - Flexbox Version */
 .Gallery {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
+  width: 100%;
+  padding: 0; /* Remove side padding */
+  margin: 0; /* Remove margins */
 }
 
 .error-message {
@@ -23,11 +23,11 @@
 .flex-grid {
   display: flex;
   flex-wrap: wrap;
-  margin: -5px; /* Negative margin to offset the padding in items */
+  margin: 0; /* Remove negative margin */
 }
 
 .saved-image {
-  padding: 5px;
+  padding: 15px; /* Reduce padding between images */
   position: relative;
   overflow: hidden;
   flex-grow: 1;
@@ -36,41 +36,41 @@
 
 /* Base widths for different sized images */
 .saved-image {
-  width: calc(25% - 10px); /* 4 images per row by default */
-  height: 200px;
-  margin-bottom: 10px;
+  width: calc(25% - 6px); /* 4 images per row with reduced spacing */
+  height: 280px; /* Consistent height per row */
+  margin-bottom: 6px;
+}
+
+.saved-image.extra-large {
+  width: calc(50% - 6px); /* 2 images per row */
+  height: 280px; /* Same height as others in the row */
 }
 
 .saved-image.large {
-  width: calc(50% - 10px); /* 2 images per row */
-  height: 300px;
+  width: calc(50% - 6px); /* 2 images per row */
+  height: 280px; /* Same height as others in the row */
 }
 
 .saved-image.medium {
-  width: calc(33.333% - 10px); /* 3 images per row */
-  height: 250px;
+  width: calc(33.333% - 6px); /* 3 images per row */
+  height: 280px; /* Same height as others in the row */
 }
 
-.saved-image.wide {
-  width: calc(50% - 10px); /* 2 images per row */
-  height: 200px;
-}
-
-.saved-image.tall {
-  width: calc(25% - 10px); /* 4 images per row */
-  height: 400px;
+.saved-image.small {
+  width: calc(25% - 6px); /* 4 images per row */
+  height: 280px; /* Same height as others in the row */
 }
 
 .saved-image-inner {
   height: 100%;
-  border-radius: 8px;
+  border-radius: 4px; /* Slightly reduced border radius */
   overflow: hidden;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
   transition: box-shadow 0.3s ease;
 }
 
 .saved-image-inner:hover {
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .saved-image img {
@@ -100,49 +100,4 @@ button {
 
 button:hover {
   background-color: #2980b9;
-}
-
-/* Responsive adjustments */
-@media (max-width: 992px) {
-  .saved-image {
-    width: calc(33.333% - 10px); /* 3 images per row */
-  }
-
-  .saved-image.large,
-  .saved-image.wide {
-    width: calc(66.666% - 10px); /* 2/3 width */
-  }
-
-  .saved-image.medium {
-    width: calc(50% - 10px); /* 2 images per row */
-  }
-}
-
-@media (max-width: 768px) {
-  .saved-image,
-  .saved-image.medium {
-    width: calc(50% - 10px); /* 2 images per row */
-    height: 180px;
-  }
-
-  .saved-image.large,
-  .saved-image.wide {
-    width: calc(100% - 10px); /* Full width */
-    height: 250px;
-  }
-
-  .saved-image.tall {
-    height: 350px;
-  }
-}
-
-@media (max-width: 480px) {
-  .saved-image,
-  .saved-image.medium,
-  .saved-image.large,
-  .saved-image.wide,
-  .saved-image.tall {
-    width: calc(100% - 10px); /* Full width on mobile */
-    height: 200px;
-  }
 }
