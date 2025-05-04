@@ -1,0 +1,148 @@
+/* Gallery.css - Flexbox Version */
+.Gallery {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.error-message {
+  color: #e74c3c;
+  font-weight: bold;
+  padding: 10px;
+  border-left: 4px solid #e74c3c;
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.no-images {
+  text-align: center;
+  font-style: italic;
+  color: #7f8c8d;
+  margin: 40px 0;
+}
+
+.flex-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -5px; /* Negative margin to offset the padding in items */
+}
+
+.saved-image {
+  padding: 5px;
+  position: relative;
+  overflow: hidden;
+  flex-grow: 1;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Base widths for different sized images */
+.saved-image {
+  width: calc(25% - 10px); /* 4 images per row by default */
+  height: 200px;
+  margin-bottom: 10px;
+}
+
+.saved-image.large {
+  width: calc(50% - 10px); /* 2 images per row */
+  height: 300px;
+}
+
+.saved-image.medium {
+  width: calc(33.333% - 10px); /* 3 images per row */
+  height: 250px;
+}
+
+.saved-image.wide {
+  width: calc(50% - 10px); /* 2 images per row */
+  height: 200px;
+}
+
+.saved-image.tall {
+  width: calc(25% - 10px); /* 4 images per row */
+  height: 400px;
+}
+
+.saved-image-inner {
+  height: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  transition: box-shadow 0.3s ease;
+}
+
+.saved-image-inner:hover {
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+.saved-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.saved-image:hover img {
+  transform: scale(1.05);
+}
+
+button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+  display: block;
+  margin: 20px auto 0;
+}
+
+button:hover {
+  background-color: #2980b9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+  .saved-image {
+    width: calc(33.333% - 10px); /* 3 images per row */
+  }
+
+  .saved-image.large,
+  .saved-image.wide {
+    width: calc(66.666% - 10px); /* 2/3 width */
+  }
+
+  .saved-image.medium {
+    width: calc(50% - 10px); /* 2 images per row */
+  }
+}
+
+@media (max-width: 768px) {
+  .saved-image,
+  .saved-image.medium {
+    width: calc(50% - 10px); /* 2 images per row */
+    height: 180px;
+  }
+
+  .saved-image.large,
+  .saved-image.wide {
+    width: calc(100% - 10px); /* Full width */
+    height: 250px;
+  }
+
+  .saved-image.tall {
+    height: 350px;
+  }
+}
+
+@media (max-width: 480px) {
+  .saved-image,
+  .saved-image.medium,
+  .saved-image.large,
+  .saved-image.wide,
+  .saved-image.tall {
+    width: calc(100% - 10px); /* Full width on mobile */
+    height: 200px;
+  }
+}

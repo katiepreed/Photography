@@ -1,0 +1,6 @@
+transformers
+torch
+flask
+pillow
+flask_cors
+timm
