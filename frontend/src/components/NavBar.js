@@ -34,10 +34,11 @@ const NavBar = ({ onFileUpload, onImageSaved }) => {
         // First, pass the file to the parent component for preview
         onFileUpload(selectedFile);
 
-        // Then, generate a caption
+        // Then, generate a caption using Gemini
         const formData = new FormData();
         formData.append("image", selectedFile);
 
+        // Use the Gemini captioning endpoint instead of the original one
         const captionResponse = await fetch(
           "http://localhost:5001/generate-caption",
           {
@@ -68,10 +69,11 @@ const NavBar = ({ onFileUpload, onImageSaved }) => {
           img.src = objectUrl;
         });
 
-        // Save the image to the database
+        // Save the image to the database with both caption types
         const saveFormData = new FormData();
         saveFormData.append("image", selectedFile);
-        saveFormData.append("caption", caption);
+        saveFormData.append("caption", caption); // Original caption field for backward compatibility
+        saveFormData.append("gemini_caption", caption); // Add the Gemini caption field
         saveFormData.append(
           "dominantColor",
           JSON.stringify(colorData.dominantColor)
@@ -93,7 +95,7 @@ const NavBar = ({ onFileUpload, onImageSaved }) => {
         }
 
         // Optionally, you could update some state to show a success message
-        console.log("Image saved successfully to database");
+        console.log("Image saved successfully to database with Gemini caption");
 
         if (onImageSaved) {
           onImageSaved();

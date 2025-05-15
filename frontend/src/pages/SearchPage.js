@@ -8,29 +8,8 @@ const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    // Check if embeddings have been generated
-    const checkEmbeddingsStatus = async () => {
-      try {
-        const response = await fetch("http://localhost:5003/embeddings-status");
-        const data = await response.json();
-        if (!data.initialized) {
-          // Show a notification that embeddings are being generated
-          alert(
-            "Initializing image embeddings for faster search. This may take a moment."
-          );
-
-          // Trigger the process to generate embeddings for all images
-          await fetch("http://localhost:5003/process-all-images");
-        }
-      } catch (error) {
-        console.error("Error checking embeddings status:", error);
-      }
-    };
-
-    checkEmbeddingsStatus();
-  }, []);
+  // Add state to track which captions to use
+  const [captionType, setCaptionType] = useState("gemini");
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -39,13 +18,16 @@ const SearchPage = () => {
 
     setIsLoading(true);
     try {
-      // Call the semantic-search endpoint with a POST request
-      const response = await fetch("http://localhost:5003/multimodal-search", {
+      // Call the semantic-search endpoint with the selected caption type
+      const response = await fetch("http://localhost:5001/semantic-search", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ query: searchTerm }),
+        body: JSON.stringify({
+          query: searchTerm,
+          caption_type: captionType,
+        }),
       });
 
       if (response.ok) {
@@ -91,12 +73,22 @@ const SearchPage = () => {
                 src={`http://localhost:5002/uploads/${image.filename}`}
                 alt={image.caption}
               />
-              <p>{image.caption}</p>
-              <p>Similarity: {(image.similarity * 100).toFixed(1)}%</p>
+              <div className="caption-container">
+                <p className="caption-text">{image.caption}</p>
+                <p className="similarity-score">
+                  Similarity: {(image.similarity * 100).toFixed(1)}%
+                </p>
+              </div>
             </div>
           ))
         ) : (
-          <p>{isLoading ? "Searching..." : "No search results to display."}</p>
+          <p className="no-results-message">
+            {isLoading
+              ? "Searching..."
+              : searchTerm
+              ? "No matching images found."
+              : "Enter a search term to find images."}
+          </p>
         )}
       </div>
     </div>
