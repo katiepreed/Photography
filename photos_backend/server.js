@@ -46,13 +46,23 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// New endpoint to save images
+/*
+This is Multer middleware that:
+
+- Looks for a form field named "image" in the incoming request
+- Processes the file upload from that field
+- Stores the file according to your storage configuration
+- Creates a file object on the request (req.file)
+*/
+
+// Endpoint to save images
 app.post("/save-image", upload.single("image"), (req, res) => {
   const { caption } = req.body;
   const dominantColor = JSON.parse(req.body.dominantColor);
   const colorPalette = JSON.parse(req.body.colorPalette);
-
   const filename = req.file.filename;
+
+  console.log(filename);
 
   const sql = `INSERT INTO images (filename, caption, dominant_color, color_palette) 
                VALUES (?, ?, ?, ?)`;
@@ -65,22 +75,25 @@ app.post("/save-image", upload.single("image"), (req, res) => {
       JSON.stringify(dominantColor),
       JSON.stringify(colorPalette),
     ],
-    function (err) {
+
+    async function (err) {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: err.message });
       }
 
+      const imageId = this.lastID;
+
       return res.json({
         success: true,
-        id: this.lastID,
+        id: imageId,
         filename: filename,
       });
     }
   );
 });
 
-// Add endpoint to retrieve saved images
+// Endpoint to retrieve saved images
 app.get("/images", (req, res) => {
   const sql = `SELECT * FROM images ORDER BY upload_date DESC`;
 

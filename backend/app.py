@@ -3,39 +3,71 @@ from PIL import Image
 from flask_cors import CORS
 import io
 import google.generativeai as genai
-import numpy as np
-from transformers import AutoTokenizer, AutoModel
-import torch
-import torch.nn.functional as F
-import requests
-import os
+from sentence_transformers import SentenceTransformer
+import chroma_db
 
 app = Flask(__name__)
 
 # Configure CORS to allow requests from all origins
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
 
 # Load model for semantic search
-tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
-model = AutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
+sentence_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
+# Initialize the Gemini 2.0 Flash model for the best free tier performance
+gemini_model = genai.GenerativeModel('gemini-2.0-flash')
 
 # Configure Gemini API
 GEMINI_API_KEY = "AIzaSyDXt_YIMOB5oC3jv4KgkBZYVYFY4-nqidc"
+genai.configure(api_key=GEMINI_API_KEY)
 
-def setup_gemini_model():
-    """Initialize the Gemini 2.0 Flash model for the best free tier performance"""
-    return genai.GenerativeModel('gemini-2.0-flash')
+"""
+Generate a detailed caption for an image using Google's Gemini 2.0 Flash model.
 
+Args:
+   
+- image (PIL.Image): The input image to caption
+- prompt (str, optional): Custom prompt to guide caption generation - If None, uses a default comprehensive prompt
+
+Returns: Generated caption text describing the image
+"""
+def generate_gemini_caption(image, prompt=None):
+    
+    # Default prompt for captioning if none provided
+    if not prompt:
+        prompt = """
+        Generate a detailed descriptive caption for this image. 
+        Include information about:
+        - Main subjects and their attributes (colors, actions, positions)
+        - Background elements and setting
+        - Mood or atmosphere of the image
+        - Any notable objects or features
+        Provide a comprehensive description in 2-3 sentences.
+        """
+    
+    # Convert PIL image to format Gemini expects
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format='JPEG')
+    image_bytes.seek(0)
+    image_data = image_bytes.getvalue()
+    
+    # Generate caption with Gemini
+    response = gemini_model.generate_content([prompt, {"mime_type": "image/jpeg", "data": image_data} ])
+    
+    return response.text
+
+"""
+API endpoint to generate a caption for an uploaded image.
+
+Expects:
+
+- Form data with 'image' file
+- Optional 'prompt' parameter to customize caption generation
+
+Returns: JSON response with the generated caption
+"""
 @app.route("/generate-caption", methods=["POST"])
 def generate_caption():
-    """Generate a detailed caption using Gemini 2.0 Flash"""
-    if not GEMINI_API_KEY:
-        return jsonify({"error": "Gemini API key not configured"}), 500
-        
-    # Check if an image was provided
-    if "image" not in request.files:
-        return jsonify({"error": "No image provided"}), 400
-        
     file = request.files["image"]
     image = Image.open(file.stream).convert("RGB")
     
@@ -45,111 +77,62 @@ def generate_caption():
     # Generate detailed caption using Gemini
     caption = generate_gemini_caption(image, prompt)
     
-    # Check if caption generation was successful
-    if caption.startswith("Error generating caption"):
-        return jsonify({"error": caption}), 500
+    return jsonify({ "caption": caption})
+
+"""
+API endpoint to save a caption embedding to ChromaDB for future search.
+
+Expects JSON data with:
+
+- image_id: Unique identifier for the image
+- caption: Generated or user-provided caption text
+- filename: Original image filename
+- dominant_color: Main color of the image (optional)
+- color_palette: Color palette extracted from image (optional)
+
+Returns: JSON confirmation of successful storage
+"""
+@app.route("/save-embedding", methods=["POST"])
+def save_embedding():
+    data = request.json
+    image_id = data.get("image_id")
+    caption = data.get("caption")
+    filename = data.get("filename") 
+
+    # Generate the embedding for the caption
+    embedding = sentence_model.encode(caption)
+
+    chroma_db.add_caption_embedding(image_id, caption, embedding, filename)
+
+    return jsonify({"success": True, "message": f"Embedding saved for image ID: {image_id}"})
+
+"""
+API endpoint for semantic search of stored images based on text query.
+
+Expects JSON data with:
+    - query: Text description to search for similar images
+
+Returns:
+
+- JSON with array of matching results, ordered by similarity
+- Each result includes the image ID, caption, and metadata
     
-    return jsonify({
-        "caption": caption
-    })
-
-def generate_gemini_caption(image, prompt=None):
-    """Generate detailed caption using Gemini 2.0 Flash"""
-    try:
-        model = setup_gemini_model()
-        
-        # Default prompt for captioning if none provided
-        if not prompt:
-            prompt = """
-            Generate a detailed descriptive caption for this image. 
-            Include information about:
-            - Main subjects and their attributes (colors, actions, positions)
-            - Background elements and setting
-            - Mood or atmosphere of the image
-            - Any notable objects or features
-            Provide a comprehensive description in 2-3 sentences.
-            """
-        
-        # Convert PIL image to format Gemini expects
-        image_bytes = io.BytesIO()
-        image.save(image_bytes, format='JPEG')
-        image_bytes.seek(0)
-        image_data = image_bytes.getvalue()
-        
-        # Generate caption with Gemini
-        response = model.generate_content([
-            prompt,
-            {"mime_type": "image/jpeg", "data": image_data}
-        ])
-        
-        return response.text
-    except Exception as e:
-        print(f"Error generating Gemini caption: {e}")
-        return f"Error generating caption: {str(e)}"
-
-def mean_pooling(model_output, attention_mask):
-    """Mean pooling to get sentence embeddings"""
-    token_embeddings = model_output[0]
-    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-    return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-
-def get_embedding(text):
-    """Get embedding for a text using sentence-transformers model"""
-    encoded_input = tokenizer(text, padding=True, truncation=True, return_tensors='pt')
-    with torch.no_grad():
-        model_output = model(**encoded_input)
-    
-    sentence_embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
-    return F.normalize(sentence_embeddings, p=2, dim=1).numpy()[0]
-
-def semantic_similarity(query_embedding, text_embedding):
-    """Calculate cosine similarity between two embeddings"""
-    return np.dot(query_embedding, text_embedding)
-
-# This route should be added to your existing Flask app
-
+Note:
+    - Returns up to 20 most relevant results
+    - Uses similarity threshold of 0.3 (higher is more strict)
+"""
 @app.route("/semantic-search", methods=["POST"])
 def semantic_search():
     data = request.json
     query = data.get("query", "")
+
+    query_embedding = sentence_model.encode(query)
+
+    # Search chromaDB using the embedding
+    results = chroma_db.search_by_embedding(query_embedding, top_k=20, threshold=0.3)
     
-    if not query:
-        return jsonify({"error": "No search query provided"}), 400
-    
-    # Get query embedding
-    query_embedding = get_embedding(query)
-    
-    try:
-        # Get images from your Node.js server
-        response = requests.get("http://localhost:5002/images")
-        if response.status_code != 200:
-            return jsonify({"error": "Failed to fetch images"}), 500
-        
-        images = response.json()["images"]
-        
-        # Calculate similarity and rank images
-        results = []
-        for img in images:
-            if img["caption"]:
-                caption_embedding = get_embedding(img["caption"])
-                similarity = semantic_similarity(query_embedding, caption_embedding)
-                results.append({
-                    "id": img["id"],
-                    "filename": img["filename"],
-                    "caption": img["caption"],
-                    "similarity": float(similarity)
-                })
-        
-        # Sort by similarity (highest first)
-        results.sort(key=lambda x: x["similarity"], reverse=True)
-        
-        # Filter to results with reasonable similarity (threshold can be adjusted)
-        filtered_results = [img for img in results if img["similarity"] > 0.3]
-        
-        return jsonify({"results": filtered_results})
-    
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"results": results})
+
 
 if __name__ == "__main__":
     # Run Flask on port 5001

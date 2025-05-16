@@ -8,8 +8,6 @@ const SearchPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  // Add state to track which captions to use
-  const [captionType, setCaptionType] = useState("gemini");
 
   const handleSearch = async (e) => {
     e.preventDefault();
@@ -17,6 +15,7 @@ const SearchPage = () => {
     if (!searchTerm.trim()) return;
 
     setIsLoading(true);
+
     try {
       // Call the semantic-search endpoint with the selected caption type
       const response = await fetch("http://localhost:5001/semantic-search", {
@@ -26,7 +25,6 @@ const SearchPage = () => {
         },
         body: JSON.stringify({
           query: searchTerm,
-          caption_type: captionType,
         }),
       });
 

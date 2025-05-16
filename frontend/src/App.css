@@ -114,13 +114,15 @@ input[type="file"] {
   align-items: baseline;
   padding-top: 40px;
   font-weight: 500;
+  flex-wrap: wrap;
 }
 
 .mini-nav {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
-  min-width: 400px;
+  width: 400px;
+  padding-top: 50px;
 }
 
 .nav-bar-option {

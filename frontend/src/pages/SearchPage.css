@@ -4,7 +4,6 @@
   flex-direction: column;
   align-items: center;
   padding: 2rem;
-  max-width: 1200px;
   margin: 0 auto;
 }
 
@@ -86,6 +85,7 @@
   overflow: hidden;
   transition: transform 0.2s, box-shadow 0.2s;
   margin: 30px;
+  max-width: 320px;
 }
 
 .search-result-item:hover {
@@ -94,7 +94,6 @@
 }
 
 .search-result-item img {
-  min-width: 200px;
   width: 100%;
   height: 180px;
   object-fit: cover;

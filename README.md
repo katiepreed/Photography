@@ -5,10 +5,10 @@ frontend:
 
 backend:
 
-- pip3 install <package>
-- python3 app.py
+- pip install -r requirements.txt
+- python app.py
 
-backend-proxy:
+backend-photos:
 
 - npm install
 - npm start
