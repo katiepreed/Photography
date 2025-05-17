@@ -1,0 +1,37 @@
+.pill-menu {
+  display: flex;
+  background-color: #f0f0f0;
+  border-radius: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  width: 400px;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 50px;
+}
+
+.pill-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: none;
+  border-radius: 25px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #555;
+  font-weight: 500;
+  gap: 20px;
+  padding: 7px;
+  margin: 6px;
+  width: 150px;
+}
+
+.pill-button:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+}
+
+.pill-button.active {
+  background-color: white;
+  color: #4285f4;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

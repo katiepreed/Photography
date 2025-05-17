@@ -4,6 +4,7 @@ import NavBar from "./components/NavBar";
 import SearchPage from "./pages/SearchPage";
 import AlbumsPage from "./pages/AlbumsPage";
 import HomePage from "./pages/HomePage";
+import AlbumDetailPage from "./pages/AlbumDetailPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import "./App.css";
@@ -31,6 +32,7 @@ function App() {
           />
           <Route path="/search" element={<SearchPage />} />
           <Route path="/albums" element={<AlbumsPage />} />
+          <Route path="/albums/:id" element={<AlbumDetailPage />} />
         </Routes>
       </div>
     </Router>

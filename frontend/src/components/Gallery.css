@@ -84,20 +84,3 @@
 .saved-image:hover img {
   transform: scale(1.05);
 }
-
-button {
-  background-color: #3498db;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: background-color 0.3s ease;
-  display: block;
-  margin: 20px auto 0;
-}
-
-button:hover {
-  background-color: #2980b9;
-}

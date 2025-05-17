@@ -123,6 +123,7 @@ input[type="file"] {
   justify-content: space-around;
   width: 400px;
   padding-top: 50px;
+  right: 0;
 }
 
 .nav-bar-option {
@@ -150,7 +151,7 @@ img {
 .divider {
   height: 3px;
   background-color: black;
-  margin-bottom: 50px;
+  margin-bottom: 10px;
 }
 
 .no-images {

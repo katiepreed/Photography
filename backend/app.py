@@ -5,8 +5,17 @@ import io
 import google.generativeai as genai
 from sentence_transformers import SentenceTransformer
 import chroma_db
+import torch
+import clip
+import numpy as np
+import os
+from io import BytesIO
 
 app = Flask(__name__)
+
+# Initialize CLIP model - add this with your other model initializations
+device = "cuda" if torch.cuda.is_available() else "cpu"
+clip_model, preprocess = clip.load("ViT-B/32", device=device)
 
 # Configure CORS to allow requests from all origins
 CORS(app, resources={r"/*": {"origins": ["http://localhost:3000"]}})
@@ -132,7 +141,6 @@ def semantic_search():
     results = chroma_db.search_by_embedding(query_embedding, top_k=20, threshold=0.3)
     
     return jsonify({"results": results})
-
 
 if __name__ == "__main__":
     # Run Flask on port 5001

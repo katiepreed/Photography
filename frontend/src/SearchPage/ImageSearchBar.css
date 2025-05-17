@@ -1,0 +1,75 @@
+/* ImageSearchBar.css */
+.image-search-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.image-preview-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  border-radius: 16px;
+  padding: 6px;
+  cursor: pointer;
+  justify-content: center;
+}
+
+.image-preview {
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+}
+
+.preview-and-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.search-image-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  border-radius: 24px;
+  padding: 12px 20px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  margin-top: 40px;
+  width: 200px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.search-image-button:hover {
+  background-color: #3367d6;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.search-image-button:active {
+  background-color: #2a56c6;
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.search-upload-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 11px;
+  font-size: 16px;
+  border: 1px dashed #ccc;
+  border-radius: 30px;
+  background-color: #f8f8f8;
+  color: #555;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}

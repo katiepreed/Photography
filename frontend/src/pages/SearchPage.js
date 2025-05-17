@@ -1,83 +1,73 @@
-// components/SearchPage.js
 import React, { useState, useEffect } from "react";
+import AlbumCreationModal from "../SearchPage/AlbumCreationModal";
+import SearchBar from "../SearchPage/SearchBar";
+import ColorSearchBar from "../SearchPage/ColorSearchBar";
+import ImageSearchBar from "../SearchPage/ImageSearchBar";
+import SearchTypeSelector from "../SearchPage/SearchTypeSelector";
+import SearchResult from "../SearchPage/SearchResult";
 import "./SearchPage.css";
-// Import search icon
-import { Search } from "lucide-react";
+import { Plus } from "lucide-react";
 
 const SearchPage = () => {
-  const [searchTerm, setSearchTerm] = useState("");
+  const [showModal, setShowModal] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [searchType, setSearchType] = useState("text");
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  const handleCreateAlbum = () => {
+    if (searchResults.length === 0) {
+      alert("You need search results to create an album!");
+      return;
+    }
+    setShowModal(true);
+  };
 
-    if (!searchTerm.trim()) return;
+  const handleSearch = async (term, results, loading) => {
+    setSearchTerm(term);
+    setSearchResults(results);
+    setIsLoading(loading);
+  };
 
-    setIsLoading(true);
+  const handleSearchTypeChange = (type) => {
+    setSearchType(type);
+    // Clear previous search results when changing search type
+    setSearchResults([]);
+    setSearchTerm("");
+  };
 
-    try {
-      // Call the semantic-search endpoint with the selected caption type
-      const response = await fetch("http://localhost:5001/semantic-search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: searchTerm,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.results || []);
-        console.log("Search results:", data.results);
-      } else {
-        console.error("Error response:", await response.text());
-      }
-    } catch (error) {
-      console.error("Error searching images:", error);
-    } finally {
-      setIsLoading(false);
+  const renderSearchComponent = () => {
+    switch (searchType) {
+      case "text":
+        return <SearchBar onSearch={handleSearch} />;
+      case "image":
+        return <ImageSearchBar onSearch={handleSearch} />;
+      case "color":
+        return <ColorSearchBar onSearch={handleSearch} />;
+      default:
+        return <SearchBar onSearch={handleSearch} />;
     }
   };
 
   return (
     <div className="search-page">
-      <form onSubmit={handleSearch} className="search-form">
-        <div className="search-input-container">
-          <input
-            className="search-bar"
-            type="text"
-            placeholder="Search for images semantically..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="search-icon-button"
-            disabled={isLoading}
-          >
-            {isLoading ? <div className="spinner"></div> : <Search size={20} />}
+      <SearchTypeSelector onSearchTypeChange={handleSearchTypeChange} />
+
+      {renderSearchComponent()}
+
+      {searchResults.length > 0 && (
+        <div className="search-actions">
+          <button className="create-album-button" onClick={handleCreateAlbum}>
+            <Plus size={16} />
+            Create Album from Results
           </button>
         </div>
-      </form>
+      )}
 
       <div className="search-results">
         {searchResults.length > 0 ? (
           searchResults.map((image) => (
-            <div key={image.id} className="search-result-item">
-              <img
-                src={`http://localhost:5002/uploads/${image.filename}`}
-                alt={image.caption}
-              />
-              <div className="caption-container">
-                <p className="caption-text">{image.caption}</p>
-                <p className="similarity-score">
-                  Similarity: {(image.similarity * 100).toFixed(1)}%
-                </p>
-              </div>
-            </div>
+            <SearchResult key={image.id} image={image} />
           ))
         ) : (
           <p className="no-results-message">
@@ -85,10 +75,22 @@ const SearchPage = () => {
               ? "Searching..."
               : searchTerm
               ? "No matching images found."
-              : "Enter a search term to find images."}
+              : searchType === "text"
+              ? "Enter a search term to find images."
+              : searchType === "image"
+              ? "Upload an image to find similar images."
+              : "Select a color to find matching images."}
           </p>
         )}
       </div>
+
+      {/* Album Creation Modal */}
+      {showModal && (
+        <AlbumCreationModal
+          setShowModal={setShowModal}
+          searchResults={searchResults}
+        />
+      )}
     </div>
   );
 };
